@@ -9,3 +9,10 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+
+vlg
+igraph-0.9.4
+graphs/inet
+graphs/ip
+graphs/p2p
+graphs/web

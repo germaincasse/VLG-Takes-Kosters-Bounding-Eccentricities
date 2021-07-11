@@ -1,0 +1,21 @@
+Projet BE de VLG
+Germain Cassé, Raphael Gautier
+
+--------------------------------------------------------------------------------
+
+
+- Installation de igraph :
+    Télécharger et décompresser la lib ici : https://igraph.org/c/
+	`cd igraph-0.9.4`
+    `make`
+    `make install`
+    Le dossier `/usr/local/include/igraph` devrait être créé
+
+- Lancement :
+    `cmake CMakeLists.txt`
+    `make`
+    `./vlg graph/shuriken` -- lancement avec le graph shuriken
+
+
+- Graphs à télécharger :
+	http://data.complexnetworks.fr/Diameter/ - inet, ip, p2p, web
