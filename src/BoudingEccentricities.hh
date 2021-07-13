@@ -6,5 +6,6 @@
 #include <list>
 #include <vector>
 #include <limits>
-
+#include <cstdlib>
+#include <ctime>
 void boudingEccentricities(igraph_t graph);
