@@ -11,6 +11,7 @@ include_directories( /usr/local/include/igraph/
 link_directories( /usr/local/lib/ )
 add_executable( vlg
     src/main.cpp
+    src/BoudingEccentricities.cpp
     )
 
 
