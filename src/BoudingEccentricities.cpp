@@ -38,6 +38,7 @@ void boudingEccentricities(igraph_t graph) {
     
     igraph_integer_t n_edges = igraph_ecount(&W);     // nombre d'edges
     igraph_integer_t n_verts = igraph_vcount(&W);     // nombre de vertices 
+    igraph_integer_t n_verts_total = n_verts;
     std::cout << n_verts << " vertices\n";
     
     // eccentricité et bornes sup/inf - initialisation
@@ -60,34 +61,33 @@ void boudingEccentricities(igraph_t graph) {
         igraph_integer_t v = rand() % n_verts;
 
         it++;
-        std::cout << "iteration " << it << " - n_verts=" << igraph_ecount(&W) << " - v=" << v << " - ";
+        std::cout << "iteration " << it << " - n_verts=" << igraph_ecount(&W) << " - v=" << v << " - result : ";
 
         // calcul de l'eccentricité
         igraph_vector_t ecc_i;
-        igraph_vector_init(&ecc_i, n_verts);
+        igraph_vector_init(&ecc_i, n_verts_total);
         igraph_eccentricity(&W, &ecc_i, igraph_vss_1(v), IGRAPH_ALL);
         igraph_real_t eccentricity = igraph_vector_e(&ecc_i, 0);
         igraph_vector_set(&ecc, v, eccentricity);
 
-        print_vector(&ecc, n_verts);
+        print_vector(&ecc, n_verts_total);
         
-        for (igraph_integer_t w = 0; w < n_verts; w++)
+        igraph_matrix_t res;
+        igraph_matrix_init(&res, 1, n_verts_total);
+        igraph_shortest_paths(&W, &res, igraph_vss_1(v), igraph_vss_all(), IGRAPH_ALL);
+        igraph_vector_t distances;
+        igraph_vector_init(&distances, n_verts_total);
+        igraph_matrix_get_row(&res, &distances, 0);
+        std::cout << "distances : ";
+        print_vector(&distances, n_verts_total);
+        for (igraph_integer_t w = 0; w < n_verts_total; w++)
         {
             n_verts = igraph_vcount(&W);     // nombre de vertices 
             // d : distance entre v et w
-            int d = 0;
-            igraph_vector_t v_w, e_w;
-            igraph_vector_init(&v_w, n_verts);
-            igraph_vector_init(&e_w, n_verts);
-
-            
-            igraph_get_shortest_path(&W, &v_w, &e_w, v, w, IGRAPH_ALL);
-            // std::cout << "path from " << v << " to " << w << "\n";
-            // print_vector(&e_w, igraph_ecount(&W));
-            // print_vector(&v_w, igraph_ecount(&W));
-
             // TODO : calcul de d //
-            
+            int d = igraph_vector_e(&distances, w);
+            std::cout << "distance = " << d << "\n";
+
 
             igraph_vector_set(&eccL, w, max(igraph_vector_e(&eccL, w), max(igraph_vector_e(&ecc, n_verts) - d, d)));
             igraph_vector_set(&eccU, w, min(igraph_vector_e(&eccU, w), d));
@@ -97,12 +97,10 @@ void boudingEccentricities(igraph_t graph) {
                 igraph_vector_set(&ecc, w, igraph_vector_e(&eccL, w));
                 igraph_delete_vertices(&W, igraph_vss_1(w));
                 std::cout << "DELETING VERTICE " << w << "\n";
+                
             }
 
         }
-
-        // TODO : retirer ce break
-
         
     }
 
