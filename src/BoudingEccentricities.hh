@@ -8,4 +8,6 @@
 #include <limits>
 #include <cstdlib>
 #include <ctime>
-void boudingEccentricities(igraph_t graph);
+
+
+igraph_vector_t boudingEccentricities(igraph_t graph);
