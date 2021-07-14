@@ -43,21 +43,26 @@ void boudingEccentricities(igraph_t graph) {
     
     // eccentricité et bornes sup/inf - initialisation
     igraph_vector_t ecc, eccU, eccL;
-    igraph_real_t ecc_c[n_verts] = {0};
-    igraph_real_t eccU_c[n_verts] = {std::numeric_limits<igraph_integer_t>::max()};
-    igraph_real_t eccL_c[n_verts] = {std::numeric_limits<igraph_integer_t>::min()};
-    igraph_vector_init_copy(&ecc, ecc_c, n_verts);
-    igraph_vector_init_copy(&eccU, eccU_c, n_verts);
-    igraph_vector_init_copy(&eccL, eccL_c, n_verts);
+    igraph_vector_bool_t candidates;
+    igraph_vector_bool_init(&candidates, n_verts);
+    igraph_vector_init(&ecc, n_verts);
+    igraph_vector_init(&eccU, n_verts);
+    igraph_vector_init(&eccL, n_verts);
+    for (igraph_integer_t i = 0; i < n_verts; i++)
+    {
+        igraph_vector_bool_set(&candidates, i, true);
+        igraph_vector_set(&ecc, i, 0);
+        igraph_vector_set(&eccU, i, std::numeric_limits<igraph_integer_t>::max());
+        igraph_vector_set(&eccL, i, std::numeric_limits<igraph_integer_t>::min());
+    }
     
     srand(time(0));
     int it = 0;
+
     while (igraph_ecount(&W) != 0)
     {
 
         // sélection d'un noeud
-
-
         igraph_integer_t v = rand() % n_verts;
 
         it++;
@@ -80,22 +85,27 @@ void boudingEccentricities(igraph_t graph) {
         igraph_matrix_get_row(&res, &distances, 0);
         std::cout << "distances : ";
         print_vector(&distances, n_verts_total);
+
+
         for (igraph_integer_t w = 0; w < n_verts_total; w++)
         {
             n_verts = igraph_vcount(&W);     // nombre de vertices 
             // d : distance entre v et w
-            // TODO : calcul de d //
             int d = igraph_vector_e(&distances, w);
             std::cout << "distance = " << d << "\n";
 
+            igraph_real_t eccL_new = max(igraph_vector_e(&eccL, w), max(igraph_vector_e(&ecc, n_verts) - d, d));
+            igraph_real_t eccU_new = min(igraph_vector_e(&eccU, w), d);
+            igraph_vector_set(&eccL, w, eccL_new);
+            igraph_vector_set(&eccU, w, eccU_new);
 
-            igraph_vector_set(&eccL, w, max(igraph_vector_e(&eccL, w), max(igraph_vector_e(&ecc, n_verts) - d, d)));
-            igraph_vector_set(&eccU, w, min(igraph_vector_e(&eccU, w), d));
-
-            if (igraph_vector_e(&eccL, w) == igraph_vector_e(&eccU, w))
+            if (eccL_new == eccU_new)
             {
-                igraph_vector_set(&ecc, w, igraph_vector_e(&eccL, w));
-                igraph_delete_vertices(&W, igraph_vss_1(w));
+
+                igraph_vector_set(&ecc, w, eccL_new);
+                
+                // suppression de w dans le graphe W
+                //igraph_delete_vertices(&W, igraph_vss_1(w));
                 std::cout << "DELETING VERTICE " << w << "\n";
                 
             }
