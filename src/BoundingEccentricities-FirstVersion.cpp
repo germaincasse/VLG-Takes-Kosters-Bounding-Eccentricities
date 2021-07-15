@@ -1,4 +1,4 @@
-// Bounding Eccentricity algorithm
+// Bounding Eccentricity algorithm - first version
 
 #include <BoudingEccentricities.hh>
 
@@ -35,18 +35,17 @@ T min(T a, U b)
 }
 
 
-int it = 0;
-
 // implémentation de l'algorithme BoundingEccentricities de Takes-Kosters.
 
 igraph_vector_t boudingEccentricities(igraph_t graph) {
+    std::cout << "-- calcul des eccentricités\n";
 
     igraph_t W{};
     igraph_copy(&W, &graph);    // W est une copie du graphe d'entrée
     
-    igraph_integer_t n_edges = igraph_ecount(&graph);     // nombre d'edges
-    igraph_integer_t n_verts = igraph_vcount(&graph);     // nombre de vertices 
-    igraph_integer_t n_verts_in_W = n_verts;
+    igraph_integer_t n_edges = igraph_ecount(&W);     // nombre d'edges
+    igraph_integer_t n_verts = igraph_vcount(&W);     // nombre de vertices 
+    igraph_integer_t n_verts_total = n_verts;
     
     // eccentricité et bornes sup/inf - initialisation
     igraph_vector_t ecc, eccU, eccL;
@@ -63,33 +62,19 @@ igraph_vector_t boudingEccentricities(igraph_t graph) {
         igraph_vector_set(&eccL, i, std::numeric_limits<igraph_integer_t>::min());
     }
     
-    it = 0;     // compte les itérations
-    while (n_verts_in_W > 0)
+    srand(time(0));     // initialisation d'un seed pour les fonctions de random
+    int it = 0;
+    while (n_verts > 0)
     {
         // sélection d'un noeud
-        igraph_integer_t v;
-
-        if (it % 2 == 0)
-            v = igraph_vector_which_max(&eccU);
-        else
-            v = igraph_vector_which_min(&eccL);
-
-        /*
-        v = rand() % n_verts;
-        while (true) {
-            v = rand() % n_verts;
-            if (igraph_vector_bool_e(&candidates, v) == true)
-                break;
-        }*/
-
-
-        it++;
-        /*
+        igraph_integer_t v = rand() % n_verts_total;
+        
         std::cout << "itération " << it << "\n";
-        */
+        it++;
+
         // calcul de l'eccentricité
         igraph_vector_t ecc_i;
-        igraph_vector_init(&ecc_i, n_verts);
+        igraph_vector_init(&ecc_i, n_verts_total);
         igraph_eccentricity(&W, &ecc_i, igraph_vss_1(v), IGRAPH_ALL);
         igraph_real_t eccentricity = igraph_vector_e(&ecc_i, 0);
         // ecc[v] <- eccentricity(v)
@@ -99,16 +84,16 @@ igraph_vector_t boudingEccentricities(igraph_t graph) {
         // calcul de toutes les distances entre v et les noeuds de W
         // TODO : utiliser 'candidates'
         igraph_matrix_t res;
-        igraph_matrix_init(&res, 1, n_verts);
+        igraph_matrix_init(&res, 1, n_verts_total);
         igraph_shortest_paths(&W, &res, igraph_vss_1(v), igraph_vss_all(), IGRAPH_ALL);
         igraph_vector_t distances;
-        igraph_vector_init(&distances, n_verts);
+        igraph_vector_init(&distances, n_verts_total);
         igraph_matrix_get_row(&res, &distances, 0);
 
 
-        for (igraph_integer_t w = 0; w < n_verts; w++)
+        for (igraph_integer_t w = 0; w < n_verts_total; w++)
         {
-            // on ne prend que les noeuds dans W :
+            // on ne prend que les noeuds dans W
             if (igraph_vector_bool_e(&candidates, w) == false)
                 continue;
             // d : distance entre v et w
@@ -124,15 +109,15 @@ igraph_vector_t boudingEccentricities(igraph_t graph) {
                 igraph_vector_set(&ecc, w, eccL_new);
 
                 // suppression de w dans le graphe W
+                //igraph_delete_vertices(&W, igraph_vss_1(w));
                 igraph_vector_bool_set(&candidates, w, false);
-
-                igraph_vector_set(&eccU, w, std::numeric_limits<igraph_integer_t>::min());
-                igraph_vector_set(&eccL, w, std::numeric_limits<igraph_integer_t>::max());
-                n_verts_in_W --;
+                n_verts --;
             }
+            
         }
     }
-    std::cout << "-- FIN -- résultat :\n";
-    print_vector(&ecc, n_verts);
+
+    std::cout << "-- DONE -- result :\n";
+    print_vector(&ecc, n_verts_total);
     return ecc;
 }
