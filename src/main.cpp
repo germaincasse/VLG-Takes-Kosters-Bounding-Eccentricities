@@ -47,11 +47,13 @@ int main(int argc, char *argv[])
 	int it_sum = 0;
 	// nombre de fois qu'on souhaite faire tourner le programme
 	int n_run = 1;
+
 	for (int i = 0; i < n_run; i++) {
 
 		boudingEccentricities(graph);
 		it_sum += it;
 	}
+	// affichage du nombre (moyen) d'itérations effectuées
 	std::cout << "-- Terminé -- \n " << (float)it_sum / n_run << " itérations (" << n_run << " tests)\n"; 
 }
 

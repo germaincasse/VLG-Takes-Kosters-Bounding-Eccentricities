@@ -16,6 +16,12 @@ Germain Cassé, Raphael Gautier
     `make`
     `./vlg graph/shuriken` -- lancement avec le graph shuriken
 
+Ce programme ne supporte que les graphes au format de C. Magnien (nombre de
+noeuds suivi d'une edge list)
+
 
 - Graphs à télécharger :
 	http://data.complexnetworks.fr/Diameter/ - inet, ip, p2p, web
+
+
+--------------------------------------------------------------------------------
